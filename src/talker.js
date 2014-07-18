@@ -1,7 +1,6 @@
 /*!
- * Talker.js 1.0.0 <https://github.com/secondstreet/talker.js>
- * Copyright 2014 Second Street
- * MIT License <http://opensource.org/licenses/MIT>
+ * © 2014 Second Street, MIT License <http://opensource.org/licenses/MIT>
+ * Talker.js 1.0.1 <http://github.com/secondstreet/talker.js>
  */
 //region Constants
 var TALKER_TYPE = 'application/x-talkerjs-v1+json';
@@ -9,15 +8,98 @@ var TALKER_ERR_TIMEOUT = 'timeout';
 //endregion Constants
 
 //region Third-Party Libraries
-/**
- * PinkySwear.js 2.1 <https://github.com/timjansen/PinkySwear.js>
- * License: Public Domain <http://creativecommons.org/publicdomain/zero/1.0/
+/*
+ * PinkySwear.js 2.1 - Minimalistic implementation of the Promises/A+ spec
+ * Modified slightly for embedding in Talker.js
+ * 
+ * Public Domain. Use, modify and distribute it any way you like. No attribution required.
+ *
+ * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+ *
+ * PinkySwear is a very small implementation of the Promises/A+ specification. After compilation with the
+ * Google Closure Compiler and gzipping it weighs less than 500 bytes. It is based on the implementation for 
+ * Minified.js and should be perfect for embedding. 
+ * 
+ * https://github.com/timjansen/PinkySwear.js
  */
-var _module = module, module = {}; // Shadow module so we can extract pinkySwear without it attaching to window
-(function(c){function f(g){return"function"==typeof g}function h(g){"undefined"!=typeof setImmediate?setImmediate(g):"undefined"!=typeof process&&process.nextTick?process.nextTick(g):setTimeout(g,0)}c[0][c[1]]=function m(){function c(l,f){null==a&&null!=l&&(a=l,k=f,b.length&&h(function(){for(var a=0;a<b.length;a++)b[a]()}));return a}var a,k=[],b=[];c.then=function(c,n){function e(){try{var b=a?c:n;if(f(b)){var h=function(a){var c,b=0;try{if(a&&("object"==typeof a||f(a))&&f(c=a.then)){if(a===d)throw new TypeError;
-    c.call(a,function(){b++||h.apply(void 0,arguments)},function(a){b++||d(!1,[a])})}else d(!0,arguments)}catch(e){b++||d(!1,[e])}};h(b.apply(void 0,k||[]))}else d(a,k)}catch(e){d(!1,[e])}}var d=m();null!=a?h(e):b.push(e);return d};return c}})("undefined"==typeof module?[window,"pinkySwear"]:[module,"exports"]);
-var pinkySwear = module.exports;
-module = _module;
+var pinkySwearPromise = (function() {
+  var undef;
+
+  function isFunction(f) {
+    return typeof f == 'function';
+  }
+  function isObject(f) {
+    return typeof f == 'object';
+  }
+  function defer(callback) {
+    if (typeof setImmediate != 'undefined')
+  setImmediate(callback);
+    else if (typeof process != 'undefined' && process['nextTick'])
+  process['nextTick'](callback);
+    else
+  setTimeout(callback, 0);
+  }
+
+  return function pinkySwear() {
+    var state;           // undefined/null = pending, true = fulfilled, false = rejected
+    var values = [];     // an array of values as arguments for the then() handlers
+    var deferred = [];   // functions to call when set() is invoked
+
+    var set = function(newState, newValues) {
+      if (state == null && newState != null) {
+        state = newState;
+        values = newValues;
+        if (deferred.length)
+          defer(function() {
+            for (var i = 0; i < deferred.length; i++)
+            deferred[i]();
+          });
+      }
+      return state;
+    };
+
+    set['then'] = function (onFulfilled, onRejected) {
+      var promise2 = pinkySwear();
+      var callCallbacks = function() {
+        try {
+          var f = (state ? onFulfilled : onRejected);
+          if (isFunction(f)) {
+            function resolve(x) {
+              var then, cbCalled = 0;
+              try {
+                if (x && (isObject(x) || isFunction(x)) && isFunction(then = x['then'])) {
+                  if (x === promise2)
+                    throw new TypeError();
+                  then['call'](x,
+                      function() { if (!cbCalled++) resolve.apply(undef,arguments); } ,
+                      function(value){ if (!cbCalled++) promise2(false,[value]);});
+                }
+                else
+                  promise2(true, arguments);
+              }
+              catch(e) {
+                if (!cbCalled++)
+                  promise2(false, [e]);
+              }
+            }
+            resolve(f.apply(undef, values || []));
+          }
+          else
+            promise2(state, values);
+        }
+        catch (e) {
+          promise2(false, [e]);
+        }
+      };
+      if (state != null)
+        defer(callCallbacks);
+      else
+        deferred.push(callCallbacks);
+      return promise2;
+    };
+    return set;
+  };
+})();
 /**
  * Object Create
  */
@@ -42,13 +124,13 @@ var objectCreate = function(proto) {
  * @returns {Talker}
  * @constructor
  */
-Talker = function(remoteWindow, remoteOrigin) {
+var Talker = function(remoteWindow, remoteOrigin) {
     this.remoteWindow = remoteWindow;
     this.remoteOrigin = remoteOrigin;
     this.timeout = 3000;
 
     this.handshaken = false;
-    this.handshake = pinkySwear();
+    this.handshake = pinkySwearPromise();
     this._id = 0;
     this._queue = [];
     this._sent = {};
@@ -72,7 +154,7 @@ Talker = function(remoteWindow, remoteOrigin) {
 Talker.prototype.send = function(namespace, data, responseToId) {
     var message = new Talker.OutgoingMessage(this, namespace, data, responseToId);
 
-    var promise = pinkySwear();
+    var promise = pinkySwearPromise();
     this._sent[message.id] = promise;
 
     this._queue.push(message);
@@ -127,7 +209,7 @@ Talker.prototype._isSafeMessage = function(source, origin, type) {
 
 /**
  * Handle a handshake message
- * @param {Object} rawObject - The postMessage content, parsed into an Object
+ * @param {Object} object - The postMessage content, parsed into an Object
  * @private
  */
 Talker.prototype._handleHandshake = function(object) {

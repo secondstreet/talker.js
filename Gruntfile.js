@@ -3,13 +3,50 @@ module.exports = function(grunt) {
     uglify: {
       options: {
         report: 'gzip',
-        sourceMap: true,
         preserveComments: 'some',
-        wrap: 'Talker'
+        compress: {
+          pure_getters: true
+        }
       },
-      dist: {
+      globals: {
+        options: {
+          banner: '(function(){',
+          footer: '\nwindow.Talker=Talker})()'
+        },
         files: {
           'dist/talker.min.js': [
+            'src/talker.js'
+          ]
+        }
+      },
+      amd: {
+        options: {
+          banner: 'define([],function(){',
+          footer: '\nreturn Talker})'
+        },
+        files: {
+          'dist/amd/talker.min.js': [
+            'src/talker.js'
+          ]
+        }
+      },
+      named_amd: {
+        options: {
+          banner: 'define("talker",[],function(){',
+          footer: '\nreturn Talker})'
+        },
+        files: {
+          'dist/named_amd/talker.min.js': [
+            'src/talker.js'
+          ]
+        }
+      },
+      common_js: {
+        options: {
+          footer: '\nmodule.exports=Talker'
+        },
+        files: {
+          'dist/common_js/talker.min.js': [
             'src/talker.js'
           ]
         }

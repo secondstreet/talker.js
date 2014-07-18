@@ -1,7 +1,7 @@
 talker.js
 =========
 
-A tiny (under 4kB), promise-based library for cross-origin communication between frames and windows.
+A tiny (&lt;4kB minified, &lt;1kB min+gzip), promise-based library for cross-origin communication between frames and windows.
 
 Building
 --------

@@ -1,6 +1,6 @@
 {
   "name": "talker.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "homepage": "https://github.com/secondstreet/talker.js",
   "author": "Second Street <development@secondstreet.com>",
   "description": "A tiny, promise-based library for cross-origin communication between frames and windows.",
