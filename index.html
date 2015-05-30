@@ -19,23 +19,63 @@
     </section>
 
     <section class="main-content">
-      <h1>
-<a id="talkerjs" class="anchor" href="#talkerjs" aria-hidden="true"><span class="octicon octicon-link"></span></a>talker.js</h1>
-
-<p>A tiny (&lt;4kB minified, &lt;1kB min+gzip), promise-based library for cross-origin communication between frames and windows.</p>
+      <p>Talker.js wraps <code>postMessage</code> in an easy-to-use API. It handles queueing your messages until it completes a handshake so it knows both sides are ready, it filters out messages that aren't from Talker on the other side, and it is built on <a href="https://kerricklong.com/talks/javascript-promises-thinking-sync-in-an-async-world.html">JavaScript Promises</a>, so you can send a request and receive a response.</p>
 
 <h2>
-<a id="documentation" class="anchor" href="#documentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Documentation</h2>
+<a id="using-talkerjs" class="anchor" href="#using-talkerjs" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using Talker.js</h2>
 
-<p>Please see <a href="http://drive.secondstreet.com/introducing-talker/">drive.secondstreet.com/introducing-talker</a> for instructions and examples for using Talker.js in your own projects.</p>
+<p>The <code>Talker</code> constructor takes a <code>window</code>, and an origin (or <code>'*'</code> to accept messages from any origin).</p>
 
-<h2>
-<a id="building" class="anchor" href="#building" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building</h2>
-
-<pre><code>npm install -g grunt-cli
-npm install
-grunt
+<pre><code>var talker = new Talker(myFrame.contentWindow, 'http://example.com/');
 </code></pre>
+
+<h3>
+<a id="sending-messages" class="anchor" href="#sending-messages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sending Messages</h3>
+
+<p>Use <code>Talker#send</code> to send a message to the other side. Messages have a namespace for organization, and can have an object sent for data transfer. The object must be able to pass through <code>JSON.stringify</code>.</p>
+
+<pre><code>talker.send('myNamespace', { data: 'here' });
+</code></pre>
+
+<h3>
+<a id="listening-for-messages" class="anchor" href="#listening-for-messages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Listening for Messages</h3>
+
+<p>Talker will call <code>Talker#onMessage</code> with a <code>Talker.IncomingMessage</code>. That message has properties for the <code>namespace</code> and <code>data</code> it was originally sent with, as well as an <code>id</code> and a reference to its <code>talker</code>.</p>
+
+<pre><code>talker.onMessage = function(message) {
+  console.log(message.namespace, message.data);
+  console.log(message.id, message.talker);
+};
+</code></pre>
+
+<h3>
+<a id="responding-to-messages" class="anchor" href="#responding-to-messages" aria-hidden="true"><span class="octicon octicon-link"></span></a>Responding to Messages</h3>
+
+<p>Use <code>Talker.IncomingMessage#respond</code> to respond to a message with an object. This returns a promise via <a href="https://github.com/timjansen/PinkySwear.js">PinkySwear.js</a> that may resolve with a response if one is sent, or may reject with an error.</p>
+
+<pre><code>talker.onMessage = function(message) {
+  message.respond({ hello: 'there' });
+};
+
+talker.send('localStorage', { get: 'username' })
+  .then(function(message) {
+    console.log(message.namespace, message.data);
+    console.log(message.id, message.talker);
+  }, function(error) {
+    console.error(error);
+  })
+;
+</code></pre>
+
+<h3>
+<a id="getting-talker" class="anchor" href="#getting-talker" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting Talker</h3>
+
+<p>Talker.js distributions are available via <a href="http://bower.io/search/?q=talkerjs">Bower</a> and <a href="https://github.com/secondstreet/talker.js/releases">GitHub</a>. The source is also <a href="https://github.com/secondstreet/talker.js">on GitHub</a>. Talker is available as a global, a named or anonymous AMD package, or a Common JS package.</p>
+
+<pre><code>$ bower install talkerjs --save
+</code></pre>
+
+<p>If you'd like to contribute, please <a href="https://github.com/secondstreet/talker.js">Fork us on GitHub</a>, or <a href="https://github.com/secondstreet/talker.js/issues/new">file an issue</a> with any bug reports or feature requests.</p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/secondstreet/talker.js">Talker.js</a> is maintained by <a href="https://github.com/secondstreet">secondstreet</a>.</span>
