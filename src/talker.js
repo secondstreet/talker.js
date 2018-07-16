@@ -15,6 +15,15 @@ var objectCreate = function(proto) {
     ctor.prototype = proto;
     return new ctor();
 };
+var defer = function() {
+    var deferred = {};
+    deferred.promise = new window.Promise(function(resolve, reject) {
+        deferred.resolve = resolve;
+        deferred.reject = reject;
+    });
+    return deferred;
+};
+
 //endregion
 
 //region Public Methods
@@ -37,7 +46,8 @@ var Talker = function(remoteWindow, remoteOrigin) {
     this.timeout = 3000;
 
     this.handshaken = false;
-    this.handshake = pinkySwearPromise();
+    this.defferedHandhake = defer();
+    this.handshake = this.defferedHandhake.promise;
     this._id = 0;
     this._queue = [];
     this._sent = {};
@@ -60,18 +70,18 @@ var Talker = function(remoteWindow, remoteOrigin) {
  */
 Talker.prototype.send = function(namespace, data, responseToId) {
     var message = new Talker.OutgoingMessage(this, namespace, data, responseToId);
+    var self = this;
 
-    var promise = pinkySwearPromise();
-    this._sent[message.id] = promise;
+    return new window.Promise(function(resolve, reject) {
+        self._sent[message.id] = resolve;
 
-    this._queue.push(message);
-    this._flushQueue();
+        self._queue.push(message);
+        self._flushQueue();
 
-    setTimeout(function() {
-        promise(false, [new Error(TALKER_ERR_TIMEOUT)]); // Reject the promise
-    }, this.timeout);
-
-    return promise;
+        setTimeout(function() {
+            reject(new Error(TALKER_ERR_TIMEOUT)); // Reject the promise
+        }, self.timeout);
+    });
 };
 //endregion Public Methods
 
@@ -122,7 +132,7 @@ Talker.prototype._isSafeMessage = function(source, origin, type) {
 Talker.prototype._handleHandshake = function(object) {
     if (object.handshake) { this._sendHandshake(this.handshaken); } // One last handshake in case the remote window (which we now know is ready) hasn't seen ours yet
     this.handshaken = true;
-    this.handshake(true, [this.handshaken]);
+    this.defferedHandhake.resolve(this.handshaken);
     this._flushQueue();
 };
 
@@ -145,7 +155,7 @@ Talker.prototype._handleMessage = function(rawObject) {
  */
 Talker.prototype._respondToMessage = function(id, message) {
     if (this._sent[id]) {
-        this._sent[id](true, [message]); // Resolve the promise
+        this._sent[id](message); // Resolve the promise
         delete this._sent[id];
     }
 };
