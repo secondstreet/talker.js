@@ -304,3 +304,10 @@ Talker.IncomingMessage.prototype.respond = function(data) {
     return this.talker.send(null, data, this.id);
 };
 //endregion Talker Incoming Message
+
+//region Talker exports
+if (typeof exports === 'object' && typeof module !== 'undefined')
+    module.exports = Talker;
+else
+  window.Talker = Talker;
+//endregion Talker exports
