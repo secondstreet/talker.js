@@ -43,7 +43,7 @@ var Talker = function(remoteWindow, remoteOrigin) {
     this._sent = {};
 
     var _this = this;
-    window.addEventListener('message', function(messageEvent) { _this._receiveMessage(messageEvent) }, false);
+    window.addEventListener('message', function(messageEvent) { _this._receiveMessage(messageEvent); }, false);
     this._sendHandshake();
 
     return this;
@@ -87,7 +87,7 @@ Talker.prototype._receiveMessage = function(messageEvent) {
     try {
         object = JSON.parse(messageEvent.data);
     }
-    catch (e) {
+    catch (_e) {
         object = {};
     }
     if (!this._isSafeMessage(messageEvent.source, messageEvent.origin, object.type)) { return false; }
