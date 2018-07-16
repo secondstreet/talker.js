@@ -52,11 +52,20 @@ var Talker = function(remoteWindow, remoteOrigin) {
     this._queue = [];
     this._sent = {};
 
-    var _this = this;
-    window.addEventListener('message', function(messageEvent) { _this._receiveMessage(messageEvent); }, false);
+    this._listener = this._receiveMessage.bind(this);
+    window.addEventListener('message', this._listener, false);
     this._sendHandshake();
 
     return this;
+};
+
+/**
+ * Destroy
+ * Destroys {Talker} instance
+ * @public
+ */
+Talker.prototype.destroy = function() {
+    window.removeEventListener('message', this._listener);
 };
 
 /**
