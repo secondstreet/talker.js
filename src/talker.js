@@ -92,6 +92,20 @@ Talker.prototype.send = function(namespace, data, responseToId) {
         }, self.timeout);
     });
 };
+
+/**
+ * Emit
+ * Sends a message without confirmation
+ * @param namespace - The namespace the message is in
+ * @param data - The data to send, must be a JSON.stringify-able object
+ * @param [responseToId=null] - If this is a response to a previous message, its ID.
+ * @public
+ */
+Talker.prototype.emit = function(namespace, data, responseToId) {
+    var message = new Talker.OutgoingMessage(this, namespace, data, responseToId);
+    this._queue.push(message);
+    this._flushQueue();
+};
 //endregion Public Methods
 
 //region Private Methods
@@ -311,6 +325,15 @@ Talker.IncomingMessage.prototype.constructor = Talker.Message;
  */
 Talker.IncomingMessage.prototype.respond = function(data) {
     return this.talker.send(null, data, this.id);
+};
+/**
+ * Terminate
+ * Terminates a message
+ * @param {Object} data - A JSON.stringify-able object
+ * @public
+ */
+Talker.IncomingMessage.prototype.terminate = function(data) {
+    return this.talker.emit(null, data, this.id);
 };
 //endregion Talker Incoming Message
 
