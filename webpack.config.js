@@ -1,6 +1,6 @@
 const path = require("path");
 
-const common = {
+const commonConfig = {
   entry: "./src/index.ts",
   devtool: "source-map",
   module: {
@@ -19,7 +19,7 @@ const common = {
 
 module.exports = [
   {
-    ...common,
+    ...commonConfig,
     output: {
       filename: "talker.min.js",
       library: "Talker",
@@ -28,7 +28,7 @@ module.exports = [
     }
   },
   {
-    ...common,
+    ...commonConfig,
     output: {
       filename: "talker.min.js",
       library: "talker",
@@ -37,7 +37,7 @@ module.exports = [
     }
   },
   {
-    ...common,
+    ...commonConfig,
     output: {
       filename: "talker.min.js",
       library: "talker",
@@ -46,7 +46,7 @@ module.exports = [
     }
   },
   {
-    ...common,
+    ...commonConfig,
     output: {
       filename: "talker.min.js",
       library: "",
@@ -55,7 +55,7 @@ module.exports = [
     }
   },
   {
-    ...common,
+    ...commonConfig,
     output: {
       filename: "talker.min.js",
       library: "talker",

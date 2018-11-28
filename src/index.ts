@@ -4,10 +4,10 @@ import createManipulablePromise, {
 import {
   IncomingMessage,
   OutgoingMessage,
-  JSONifiedMessage,
+  JSONableMessage,
   Stringifyable
 } from "./message";
-import { TALKER_TYPE, TALKER_ERR_TIMEOUT } from "./strings";
+import { TALKER_CONTENT_TYPE, TALKER_ERR_MSG_TIMEOUT } from "./constants";
 
 interface SentMessages {
   [id: number]: ManipulablePromise<IncomingMessage | Error>;
@@ -29,9 +29,11 @@ class Talker {
   onMessage?: (message: IncomingMessage) => void;
 
   // Will be resolved when a handshake is newly established with the remote window.
-  private readonly handshake: ManipulablePromise<boolean>;
+  private readonly handshake: ManipulablePromise<
+    boolean
+  > = createManipulablePromise();
   // Whether we've received a handshake from the remote window
-  private handshaken: boolean;
+  private handshaken: boolean = false;
   // The ID of the latest OutgoingMessage
   private latestId: number = 0;
   private readonly queue: OutgoingMessage[] = [];
@@ -47,9 +49,6 @@ class Talker {
     private readonly remoteOrigin: string,
     private readonly localWindow: Window = window
   ) {
-    this.handshaken = false;
-    this.handshake = createManipulablePromise();
-
     this.localWindow.addEventListener(
       "message",
       (messageEvent: MessageEvent) => this.receiveMessage(messageEvent),
@@ -70,12 +69,7 @@ class Talker {
     data: Stringifyable,
     responseToId: number | null = null
   ): ManipulablePromise<IncomingMessage | Error> {
-    const message: OutgoingMessage = new OutgoingMessage(
-      this,
-      namespace,
-      data,
-      responseToId
-    );
+    const message = new OutgoingMessage(this, namespace, data, responseToId);
 
     const promise = createManipulablePromise<IncomingMessage | Error>();
 
@@ -83,11 +77,12 @@ class Talker {
     this.queue.push(message);
     this.flushQueue();
 
-    setTimeout(
-      () =>
-        promise.__reject__ && promise.__reject__(new Error(TALKER_ERR_TIMEOUT)),
-      this.timeout
-    );
+    setTimeout(() => {
+      if (!promise.__reject__) {
+        return;
+      }
+      promise.__reject__(new Error(TALKER_ERR_MSG_TIMEOUT));
+    }, this.timeout);
 
     return promise;
   }
@@ -101,7 +96,7 @@ class Talker {
   }
 
   private receiveMessage(messageEvent: MessageEvent): void {
-    let object: JSONifiedMessage;
+    let object: JSONableMessage;
     try {
       object = JSON.parse(messageEvent.data);
     } catch (err) {
@@ -109,7 +104,7 @@ class Talker {
         namespace: "",
         data: {},
         id: this.nextId(),
-        type: TALKER_TYPE
+        type: TALKER_CONTENT_TYPE
       };
     }
     if (
@@ -126,7 +121,7 @@ class Talker {
 
   /**
    * Determines whether it is safe and appropriate to parse a postMessage messageEvent
-   * @param source - Source window object
+   * @param source - "source" property from the postMessage event
    * @param origin - Protocol, host, and port
    * @param type - Internet Media Type
    */
@@ -138,11 +133,11 @@ class Talker {
     const isSourceSafe = source === this.remoteWindow;
     const isOriginSafe =
       this.remoteOrigin === "*" || origin === this.remoteOrigin;
-    const isTypeSafe = type === TALKER_TYPE;
+    const isTypeSafe = type === TALKER_CONTENT_TYPE;
     return isSourceSafe && isOriginSafe && isTypeSafe;
   }
 
-  private handleHandshake(object: JSONifiedMessage): void {
+  private handleHandshake(object: JSONableMessage): void {
     if (object.handshake) {
       // One last handshake in case the remote window (which we now know is ready) hasn't seen ours yet
       this.sendHandshake(this.handshaken);
@@ -156,7 +151,7 @@ class Talker {
     }
   }
 
-  private handleMessage(rawObject: JSONifiedMessage): void {
+  private handleMessage(rawObject: JSONableMessage): void {
     const message = new IncomingMessage(
       this,
       rawObject.namespace,
@@ -183,7 +178,7 @@ class Talker {
 
   /**
    * Send a non-response message to awaiting hooks/callbacks
-   * @param message Message that arrived
+   * @param message - Message that arrived
    */
   private broadcastMessage(message: IncomingMessage): void {
     if (this.onMessage) {
@@ -197,7 +192,7 @@ class Talker {
    */
   private sendHandshake(confirmation: boolean = false): void {
     return this.postMessage({
-      type: TALKER_TYPE,
+      type: TALKER_CONTENT_TYPE,
       [confirmation ? "handshakeConfirmation" : "handshake"]: true
     });
   }
@@ -205,7 +200,7 @@ class Talker {
   /**
    * Wrapper around window.postMessage to only send if we have the necessary objects
    */
-  private postMessage(data: OutgoingMessage | JSONifiedMessage): void {
+  private postMessage(data: OutgoingMessage | JSONableMessage): void {
     const message = JSON.stringify(data);
     if (this.remoteWindow && this.remoteOrigin) {
       try {
