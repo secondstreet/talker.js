@@ -1,0 +1,53 @@
+{
+  "extends": ["tslint-react", "tslint-config-prettier"],
+  "rules": {
+    "arrow-return-shorthand": true,
+    "class-name": true,
+    "curly": true,
+    "forin": true,
+    "interface-name": [true, "never-prefix"],
+    "jsdoc-format": [true, "check-multiline-start"],
+    "jsx-no-lambda": false,
+    "label-position": true,
+    "member-ordering": [true, "statics-first"],
+    "no-any": true,
+    "no-arg": true,
+    "no-bitwise": true,
+    "no-console": true,
+    "no-construct": true,
+    "no-debugger": true,
+    "no-empty": true,
+    "no-eval": true,
+    "no-shadowed-variable": true,
+    "no-string-literal": true,
+    "no-switch-case-fall-through": true,
+    "no-unused-expression": [true, "allow-fast-null-checks", "allow-new"],
+    "no-use-before-declare": true,
+    "no-var-keyword": true,
+    "object-literal-shorthand": true,
+    "prefer-conditional-expression": true,
+    "prefer-const": true,
+    "prefer-for-of": true,
+    "prefer-method-signature": true,
+    "prefer-readonly": true,
+    "prefer-template": true,
+    "radix": true,
+    "switch-default": true,
+    "triple-equals": true,
+    "typedef": [
+      true,
+      "call-signature",
+      "arrow-call-signature",
+      "parameter",
+      "arrow-parameter",
+      "property-declaration",
+      "member-variable-declaration",
+      "object-destructuring",
+      "array-destructuring"
+    ],
+    "variable-name": [true, "ban-keywords", "check-format"]
+  },
+  "jsRules": {
+    "no-bitwise": true
+  }
+}
