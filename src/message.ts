@@ -19,7 +19,7 @@ abstract class Message {
   ) {}
 }
 
-export interface JSONifiedMessage {
+export interface JSONableMessage {
   readonly namespace?: string;
   readonly data?: Stringifyable;
   readonly id?: number;
