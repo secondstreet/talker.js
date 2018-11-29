@@ -1,6 +1,6 @@
-import { Promise } from "es6-promise";
-import { TALKER_CONTENT_TYPE } from "./constants";
-import Talker from "./index";
+import { Promise } from 'es6-promise';
+import { TALKER_CONTENT_TYPE } from './constants';
+import Talker from './index';
 
 abstract class Message {
   protected readonly type: string = TALKER_CONTENT_TYPE;
@@ -30,14 +30,7 @@ export interface JSONableMessage {
 }
 
 export interface Stringifyable {
-  [index: string]:
-    | string
-    | number
-    | Stringifyable
-    | Stringifyable[]
-    | boolean
-    | null
-    | undefined;
+  [index: string]: string | number | Stringifyable | Stringifyable[] | boolean | null | undefined;
 }
 
 // Consuming applications will almost never interact with this class.
@@ -66,7 +59,7 @@ export class OutgoingMessage extends Message {
       responseToId: responseToId || undefined,
       namespace,
       data,
-      type
+      type,
     };
   }
 }
@@ -75,7 +68,7 @@ export class OutgoingMessage extends Message {
 export class IncomingMessage extends Message {
   constructor(
     protected readonly talker: Talker,
-    public readonly namespace: string = "",
+    public readonly namespace: string = '',
     public readonly data: Stringifyable = {},
     // The ID of the message received from the remoteWindow
     public readonly id: number = 0

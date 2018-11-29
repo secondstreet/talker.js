@@ -4,16 +4,9 @@
  * @license Licensed under MIT License https://github.com/secondstreet/talker.js/blob/master/LICENSE
  */
 
-import createManipulablePromise, {
-  ManipulablePromise
-} from "./utils/manipulable-promise";
-import {
-  IncomingMessage,
-  OutgoingMessage,
-  JSONableMessage,
-  Stringifyable
-} from "./message";
-import { TALKER_CONTENT_TYPE, TALKER_ERR_MSG_TIMEOUT } from "./constants";
+import createManipulablePromise, { ManipulablePromise } from './utils/manipulable-promise';
+import { IncomingMessage, OutgoingMessage, JSONableMessage, Stringifyable } from './message';
+import { TALKER_CONTENT_TYPE, TALKER_ERR_MSG_TIMEOUT } from './constants';
 
 interface SentMessages {
   [id: number]: ManipulablePromise<IncomingMessage | Error>;
@@ -35,9 +28,7 @@ class Talker {
   onMessage?: (message: IncomingMessage) => void;
 
   // Will be resolved when a handshake is newly established with the remote window.
-  private readonly handshake: ManipulablePromise<
-    boolean
-  > = createManipulablePromise();
+  private readonly handshake: ManipulablePromise<boolean> = createManipulablePromise();
   // Whether we've received a handshake from the remote window
   private handshaken: boolean = false;
   // The ID of the latest OutgoingMessage
@@ -56,7 +47,7 @@ class Talker {
     private readonly localWindow: Window = window
   ) {
     this.localWindow.addEventListener(
-      "message",
+      'message',
       (messageEvent: MessageEvent) => this.receiveMessage(messageEvent),
       false
     );
@@ -105,22 +96,18 @@ class Talker {
       object = JSON.parse(messageEvent.data);
     } catch (err) {
       object = {
-        namespace: "",
+        namespace: '',
         data: {},
         id: this.nextId(),
-        type: TALKER_CONTENT_TYPE
+        type: TALKER_CONTENT_TYPE,
       };
     }
-    if (
-      !this.isSafeMessage(messageEvent.source, messageEvent.origin, object.type)
-    ) {
+    if (!this.isSafeMessage(messageEvent.source, messageEvent.origin, object.type)) {
       return;
     }
 
     const isHandshake = object.handshake || object.handshakeConfirmation;
-    return isHandshake
-      ? this.handleHandshake(object)
-      : this.handleMessage(object);
+    return isHandshake ? this.handleHandshake(object) : this.handleMessage(object);
   }
 
   /**
@@ -129,14 +116,9 @@ class Talker {
    * @param origin - Protocol, host, and port
    * @param type - Internet Media Type
    */
-  private isSafeMessage(
-    source: Window | MessagePort | ServiceWorker | null,
-    origin: string,
-    type: string
-  ): boolean {
+  private isSafeMessage(source: Window | MessagePort | ServiceWorker | null, origin: string, type: string): boolean {
     const isSourceSafe = source === this.remoteWindow;
-    const isOriginSafe =
-      this.remoteOrigin === "*" || origin === this.remoteOrigin;
+    const isOriginSafe = this.remoteOrigin === '*' || origin === this.remoteOrigin;
     const isTypeSafe = type === TALKER_CONTENT_TYPE;
     return isSourceSafe && isOriginSafe && isTypeSafe;
   }
@@ -156,16 +138,9 @@ class Talker {
   }
 
   private handleMessage(rawObject: JSONableMessage): void {
-    const message = new IncomingMessage(
-      this,
-      rawObject.namespace,
-      rawObject.data,
-      rawObject.id
-    );
+    const message = new IncomingMessage(this, rawObject.namespace, rawObject.data, rawObject.id);
     const responseId = rawObject.responseToId;
-    return responseId
-      ? this.respondToMessage(responseId, message)
-      : this.broadcastMessage(message);
+    return responseId ? this.respondToMessage(responseId, message) : this.broadcastMessage(message);
   }
 
   /**
@@ -197,7 +172,7 @@ class Talker {
   private sendHandshake(confirmation: boolean = false): void {
     return this.postMessage({
       type: TALKER_CONTENT_TYPE,
-      [confirmation ? "handshakeConfirmation" : "handshake"]: true
+      [confirmation ? 'handshakeConfirmation' : 'handshake']: true,
     });
   }
 
