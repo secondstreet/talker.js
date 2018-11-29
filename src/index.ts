@@ -1,3 +1,9 @@
+/*!
+ * @overview talker.js - a tiny promise-based wrapper for HTML5 postMessage
+ * @copyright Copyright (c) 2018 Second Street and contributors
+ * @license Licensed under MIT License https://github.com/secondstreet/talker.js/blob/master/LICENSE
+ */
+
 import createManipulablePromise, {
   ManipulablePromise
 } from "./utils/manipulable-promise";
