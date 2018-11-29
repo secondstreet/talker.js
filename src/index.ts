@@ -61,8 +61,6 @@ class Talker {
       false
     );
     this.sendHandshake();
-
-    return this;
   }
 
   /**
