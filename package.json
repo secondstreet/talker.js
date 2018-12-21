@@ -2,7 +2,7 @@
   "name": "talker.js",
   "version": "1.1.0",
   "description": "A tiny, promise-based library for cross-origin communication between frames and windows.",
-  "main": "dist/talker.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "precommit": "lint-staged",
