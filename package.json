@@ -3,6 +3,7 @@
   "version": "1.1.0",
   "description": "A tiny, promise-based library for cross-origin communication between frames and windows.",
   "main": "dist/index.js",
+  "browser": "dist/umd/talker.min.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "precommit": "lint-staged",
