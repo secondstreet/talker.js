@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "module": "es6",
+    "target": "es5",
+    "declaration": true,
+    "lib": ["es6", "dom"],
+    "sourceMap": true,
+    "baseUrl": "src/",
+    "moduleResolution": "node",
+    "rootDir": "src",
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true
+  },
+  "exclude": ["node_modules", "dist"]
+}

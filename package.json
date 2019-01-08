@@ -1,14 +1,14 @@
 {
   "name": "talker.js",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A tiny, promise-based library for cross-origin communication between frames and windows.",
-  "main": "src/talker.js",
-  "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-contrib-uglify": "^0.5.0"
-  },
+  "main": "dist/index.js",
+  "browser": "dist/umd/talker.min.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "precommit": "lint-staged",
+    "build": "tsc",
+    "test": "tslint src/"
   },
   "repository": {
     "type": "git",
@@ -26,5 +26,31 @@
   "bugs": {
     "url": "https://github.com/secondstreet/talker.js/issues"
   },
-  "homepage": "https://github.com/secondstreet/talker.js"
+  "homepage": "https://github.com/secondstreet/talker.js",
+  "lint-staged": {
+    "linters": {
+      "src/**/*.ts": [
+        "prettier --write",
+        "git add"
+      ],
+      "**/*.json": [
+        "prettier --write",
+        "git add"
+      ]
+    }
+  },
+  "devDependencies": {
+    "husky": "^1.2.0",
+    "lint-staged": "^8.1.0",
+    "prettier": "^1.15.2",
+    "ts-loader": "^5.3.1",
+    "tslint": "~5.7.0",
+    "tslint-config-prettier": "~1.9.0",
+    "typescript": "~3.1.2",
+    "webpack": "^4.26.1",
+    "webpack-cli": "^3.1.2"
+  },
+  "dependencies": {
+    "es6-promise": "~4.2.4"
+  }
 }
