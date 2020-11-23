@@ -47,7 +47,7 @@
     "tslint": "~5.7.0",
     "tslint-config-prettier": "~1.9.0",
     "typescript": "~3.1.2",
-    "webpack": "^4.28",
+    "webpack": "^4.29.6",
     "webpack-cli": "^3.1.2"
   },
   "dependencies": {
