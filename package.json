@@ -4,7 +4,7 @@
   "description": "A tiny, promise-based library for cross-origin communication between frames and windows.",
   "main": "src/talker.js",
   "devDependencies": {
-    "eslint": "^7.15.0"
+    "eslint": "^8.2.0"
   },
   "scripts": {
     "test": "eslint ."
