@@ -3,9 +3,7 @@
   "version": "1.0.1",
   "description": "A tiny, promise-based library for cross-origin communication between frames and windows.",
   "main": "src/talker.js",
-  "devDependencies": {
-    "eslint": "^8.2.0"
-  },
+  "devDependencies": {},
   "scripts": {
     "test": "eslint ."
   },
